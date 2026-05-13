@@ -12,12 +12,9 @@ import os
 import json
 import warnings
 import argparse
-import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 import mlflow
 import mlflow.sklearn
 from mlflow.tracking import MlflowClient
@@ -31,6 +28,9 @@ from sklearn.metrics import (
     roc_auc_score, confusion_matrix, classification_report,
     ConfusionMatrixDisplay,
 )
+
+# Configure matplotlib for non-interactive environment
+matplotlib.use('Agg')
 
 warnings.filterwarnings('ignore')
 
@@ -281,7 +281,7 @@ def run_training_pipeline(data_path: str = DATA_PATH, tracking_uri: str = None):
     results = {}
     run_ids = {}
 
-    with mlflow.start_run(run_name="training-pipeline") as parent_run:
+    with mlflow.start_run(run_name="training-pipeline"):
         mlflow.log_param('dataset_rows', len(X))
         mlflow.log_param('fraud_rate', round(y.mean(), 4))
         mlflow.log_param('num_features', len(FEATURE_COLS))

@@ -154,9 +154,9 @@ def run_canary_deployment(model, X_test, y_test):
     # Final status
     final_status = deployment_log[-1]['status']
     if final_status == 'OK' and deployment_log[-1]['traffic_pct'] == 1.0:
-        print(f"\n  DEPLOYMENT COMPLETE — Model serving 100% traffic")
+        print("\n  DEPLOYMENT COMPLETE — Model serving 100% traffic")
     elif final_status == 'ROLLBACK':
-        print(f"\n  DEPLOYMENT ROLLED BACK — Model NOT promoted")
+        print("\n  DEPLOYMENT ROLLED BACK — Model NOT promoted")
 
     # Save deployment log
     os.makedirs('artifacts', exist_ok=True)
@@ -194,7 +194,7 @@ def list_model_versions(tracking_uri: str = None):
 
 def main():
     """Full deployment simulation: load model, predict, canary deploy."""
-    from mlops.train import load_and_preprocess, FEATURE_COLS
+    from mlops.train import load_and_preprocess
     from sklearn.model_selection import train_test_split
 
     print("=" * 60)
