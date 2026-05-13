@@ -1,0 +1,34 @@
+[
+  {
+    "stage": "5%",
+    "traffic_pct": 0.05,
+    "sample_size": 50,
+    "accuracy": 0.94,
+    "f1_score": 0.5714,
+    "status": "OK"
+  },
+  {
+    "stage": "25%",
+    "traffic_pct": 0.25,
+    "sample_size": 250,
+    "accuracy": 0.936,
+    "f1_score": 0.7647,
+    "status": "OK"
+  },
+  {
+    "stage": "50%",
+    "traffic_pct": 0.5,
+    "sample_size": 500,
+    "accuracy": 0.924,
+    "f1_score": 0.7324,
+    "status": "OK"
+  },
+  {
+    "stage": "100%",
+    "traffic_pct": 1.0,
+    "sample_size": 1000,
+    "accuracy": 0.938,
+    "f1_score": 0.8,
+    "status": "OK"
+  }
+]
