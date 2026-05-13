@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/c54f9bbb58ab4ad5950656ec90d272df/artifacts
+end_time: 1778643090676
+entry_point_name: ''
+experiment_id: '565709049657229560'
+lifecycle_stage: active
+run_id: c54f9bbb58ab4ad5950656ec90d272df
+run_name: training-pipeline
+run_uuid: c54f9bbb58ab4ad5950656ec90d272df
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778643020502
+status: 3
+tags: []
+user_id: Rayane

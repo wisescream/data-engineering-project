@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/95a92835a42347738d554ce8ccbe7647/artifacts
+end_time: 1778643090267
+entry_point_name: ''
+experiment_id: '565709049657229560'
+lifecycle_stage: active
+run_id: 95a92835a42347738d554ce8ccbe7647
+run_name: SVM
+run_uuid: 95a92835a42347738d554ce8ccbe7647
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778643070817
+status: 3
+tags: []
+user_id: Rayane

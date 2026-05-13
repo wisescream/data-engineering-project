@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: claims_transformed
+    description: "Transformed insurance claims with derived analytics columns"
+    columns:
+      - name: claim_id
+        description: "Unique claim identifier"
+        tests:
+          - not_null
+          - unique
+      - name: region
+        description: "Uppercased region name"
+        tests:
+          - not_null
+      - name: claim_amount
+        description: "Claim amount (filtered > 0)"
+        tests:
+          - not_null
+      - name: amount_category
+        description: "Categorised claim amount: Low (<1K), Medium (<10K), High (>=10K)"
+        tests:
+          - accepted_values:
+              values: ['Low', 'Medium', 'High']
+      - name: claim_year
+        description: "Year extracted from claim_date"
+        tests:
+          - not_null
+      - name: claim_month
+        description: "Month extracted from claim_date"
+        tests:
+          - not_null

@@ -1,0 +1,251 @@
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    # MinIO / S3
+    AWS_ACCESS_KEY_ID: minioadmin
+    AWS_SECRET_ACCESS_KEY: minioadmin
+    AWS_ENDPOINT_URL: http://minio:9000
+    # ClickHouse
+    CLICKHOUSE_HOST: clickhouse
+    CLICKHOUSE_PORT: '8123'
+    CLICKHOUSE_USER: default
+    CLICKHOUSE_PASSWORD: ''
+    # Slack (replace with your webhook URL)
+    SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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'
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./scripts:/opt/airflow/scripts
+    - ./data:/opt/airflow/data
+    - ./dbt:/opt/airflow/dbt
+    - ./great_expectations:/opt/airflow/great_expectations
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./tests:/opt/airflow/tests
+  depends_on: &airflow-common-depends-on
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+
+services:
+  # ───────────────────────────── PostgreSQL (Airflow metadata) ─────────────────
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  # ───────────────────────────── Redis (Celery broker) ────────────────────────
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+    restart: always
+
+  # ───────────────────────────── ClickHouse (Data Warehouse) ──────────────────
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: clickhouse
+    ports:
+      - "8123:8123"   # HTTP interface
+      - "9000:9000"   # Native TCP
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./scripts/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+
+  # ───────────────────────────── MinIO (S3 local) ─────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9002:9000"   # S3 API
+      - "9001:9001"   # Console UI
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+
+  # MinIO init: create bucket & upload seed data
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin;
+      mc mb --ignore-existing local/insurance-data;
+      mc cp /data/sample_claims.csv local/insurance-data/raw/sample_claims.csv;
+      echo 'MinIO bucket initialized ✓';
+      "
+
+  # ───────────────────────────── Airflow Init ─────────────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db init
+        airflow users create \
+          --username admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com \
+          --password admin
+        # Create Airflow connections
+        airflow connections add 'aws_default' \
+          --conn-type 'aws' \
+          --conn-extra '{"aws_access_key_id":"minioadmin","aws_secret_access_key":"minioadmin","endpoint_url":"http://minio:9000"}'
+        airflow connections add 'clickhouse_default' \
+          --conn-type 'http' \
+          --conn-host 'clickhouse' \
+          --conn-port 8123 \
+          --conn-login 'default' \
+          --conn-password ''
+        echo "Airflow initialized ✓"
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+    depends_on:
+      <<: *airflow-common-depends-on
+    restart: on-failure
+
+  # ───────────────────────────── Airflow Webserver ────────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+  # ───────────────────────────── Airflow Scheduler ────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob", "--hostname", "$(hostname)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+  # ───────────────────────────── Airflow Celery Worker ────────────────────────
+  airflow-worker:
+    <<: *airflow-common
+    container_name: airflow-worker
+    command: celery worker
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+  # ───────────────────────────── Streamlit Dashboard ──────────────────────────
+  dashboard:
+    image: python:3.11-slim
+    container_name: dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./scripts:/app/scripts
+    working_dir: /app
+    command: >
+      bash -c "pip install streamlit pandas clickhouse-connect plotly &&
+      streamlit run scripts/dashboard.py --server.port=8501 --server.address=0.0.0.0"
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: '8123'
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ''
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres-db-volume:
+  clickhouse-data:
+  minio-data:

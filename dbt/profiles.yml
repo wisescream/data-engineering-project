@@ -1,0 +1,11 @@
+insurance_clickhouse:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      schema: insurance
+      host: clickhouse
+      port: 8123
+      user: default
+      password: ''
+      secure: false

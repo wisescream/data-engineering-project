@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/460c311ed2b24089ab48a6408f1e2116/artifacts
+end_time: 1778642942944
+entry_point_name: ''
+experiment_id: '565709049657229560'
+lifecycle_stage: active
+run_id: 460c311ed2b24089ab48a6408f1e2116
+run_name: XGBoost
+run_uuid: 460c311ed2b24089ab48a6408f1e2116
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778642909510
+status: 3
+tags: []
+user_id: Rayane

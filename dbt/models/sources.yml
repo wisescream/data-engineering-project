@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: insurance
+    schema: insurance
+    tables:
+      - name: claims
+        description: "Raw insurance claims data loaded from MinIO"
+        columns:
+          - name: claim_id
+            description: "Unique identifier for each claim"
+            tests:
+              - not_null
+              - unique
+          - name: customer_id
+            description: "Customer identifier"
+            tests:
+              - not_null
+          - name: policy_id
+            description: "Insurance policy identifier"
+            tests:
+              - not_null
+          - name: claim_date
+            description: "Date the claim was filed"
+            tests:
+              - not_null
+          - name: claim_amount
+            description: "Amount of the claim in USD"
+            tests:
+              - not_null
+          - name: insurance_type
+            description: "Type of insurance (Auto, Health, Home, Life, Travel)"
+            tests:
+              - accepted_values:
+                  values: ['Auto', 'Health', 'Home', 'Life', 'Travel']
+          - name: region
+            description: "Geographic region of the claim"
+            tests:
+              - not_null
+          - name: status
+            description: "Current status of the claim"
+            tests:
+              - accepted_values:
+                  values: ['Approved', 'Denied', 'Pending', 'Under Review', 'Settled']

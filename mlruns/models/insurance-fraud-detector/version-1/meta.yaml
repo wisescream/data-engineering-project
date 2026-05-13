@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1778642974977
+current_stage: Staging
+description: null
+last_updated_timestamp: 1778642975056
+name: insurance-fraud-detector
+run_id: 9e76c4692ddc4970a73a2ed095d8c1fb
+run_link: null
+source: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/9e76c4692ddc4970a73a2ed095d8c1fb/artifacts/model
+status: READY
+status_message: null
+storage_location: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/9e76c4692ddc4970a73a2ed095d8c1fb/artifacts/model
+user_id: null
+version: 1

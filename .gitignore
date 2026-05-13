@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+
+# Airflow
+logs/
+airflow.cfg
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+
+# Great Expectations
+great_expectations/uncommitted/
+great_expectations/.ge_store_backend_id
+
+# Data (keep sample, ignore large files)
+data/*.zip
+
+# Docker
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

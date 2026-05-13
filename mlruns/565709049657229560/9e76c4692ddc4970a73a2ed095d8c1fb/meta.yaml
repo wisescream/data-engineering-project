@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Rayane/Downloads/files%20%285%29/insurance-pipeline/mlruns/565709049657229560/9e76c4692ddc4970a73a2ed095d8c1fb/artifacts
+end_time: 1778642909382
+entry_point_name: ''
+experiment_id: '565709049657229560'
+lifecycle_stage: active
+run_id: 9e76c4692ddc4970a73a2ed095d8c1fb
+run_name: RandomForest
+run_uuid: 9e76c4692ddc4970a73a2ed095d8c1fb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778642873307
+status: 3
+tags: []
+user_id: Rayane
