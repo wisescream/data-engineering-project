@@ -1,0 +1,30 @@
+{
+    "FinOps_Config": {
+        "Project": "Insurance-Fraud-Detection",
+        "Team": "MLOps-Governance",
+        "Billing_Currency": "USD",
+        "Monthly_Budget": 500,
+        "Thresholds": [
+            {
+                "Percentage": 50,
+                "Action": "Email_Notification",
+                "Recipient": "mlops-alerts@sanlam.com"
+            },
+            {
+                "Percentage": 80,
+                "Action": "Slack_Warning",
+                "Channel": "#finops-alerts"
+            },
+            {
+                "Percentage": 100,
+                "Action": "Quota_Lockdown",
+                "Effect": "Deny_New_Resources"
+            }
+        ],
+        "Tags": {
+            "Environment": "Production",
+            "CostCenter": "CC-9042",
+            "Owner": "Governance-Team"
+        }
+    }
+}

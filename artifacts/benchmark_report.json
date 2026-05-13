@@ -1,0 +1,27 @@
+{
+  "fp32": {
+    "model_type": "fp32",
+    "total_requests": 1000,
+    "avg_latency_ms": 73.664,
+    "p50_latency_ms": 65.811,
+    "p95_latency_ms": 118.625,
+    "p99_latency_ms": 145.747,
+    "throughput_rps": 15.9,
+    "memory_mb": 0.57,
+    "accuracy": 0.938
+  },
+  "int8": {
+    "model_type": "int8",
+    "total_requests": 1000,
+    "avg_latency_ms": 45.803,
+    "p50_latency_ms": 42.564,
+    "p95_latency_ms": 66.113,
+    "p99_latency_ms": 88.903,
+    "throughput_rps": 22.5,
+    "memory_mb": 0.55,
+    "accuracy": 0.939
+  },
+  "speedup": 1.61,
+  "size_reduction": 2.01,
+  "accuracy_delta": 0.001
+}

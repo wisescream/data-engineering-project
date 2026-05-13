@@ -1,0 +1,63 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Throughput (Requests / sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(fraud_api_request_count_total[1m])) by (endpoint, model_type)",
+          "legendFormat": "{{endpoint}} ({{model_type}})"
+        }
+      ]
+    },
+    {
+      "title": "Latency P95 (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fraud_api_request_latency_seconds_bucket[1m])) by (le, model_type)) * 1000",
+          "legendFormat": "{{model_type}}"
+        }
+      ]
+    },
+    {
+      "title": "Fraud Detection Rate",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(fraud_api_prediction_distribution_total) by (prediction)",
+          "legendFormat": "{{prediction}}"
+        }
+      ]
+    },
+    {
+      "title": "Model Status",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "fraud_api_model_loaded",
+          "legendFormat": "{{model_type}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["mlops", "insurance"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "Insurance Fraud API - Real-time Monitoring",
+  "uid": "fraud_monitoring"
+}

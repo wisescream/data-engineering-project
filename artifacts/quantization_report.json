@@ -1,0 +1,17 @@
+{
+  "fp32": {
+    "accuracy": 0.938,
+    "f1_score": 0.8,
+    "size_mb": 6.04,
+    "avg_latency_ms": 75.973
+  },
+  "int8": {
+    "accuracy": 0.939,
+    "f1_score": 0.8063,
+    "size_mb": 3.0,
+    "avg_latency_ms": 51.915
+  },
+  "compression_ratio": 2.01,
+  "speedup": 1.46,
+  "accuracy_delta": 0.001
+}

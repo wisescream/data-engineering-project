@@ -1,6 +1,6 @@
 # 🏗️ Insurance Claims Pipeline — Data Engineering & MLOps
 
-> Pipeline ETL industrialisé + MLOps complet pour l'assurance — Airflow + ClickHouse + dbt + Great Expectations + MLflow + CI/CD
+> Pipeline ETL industrialisé + MLOps complet + API Production Quantifiée — Airflow + ClickHouse + dbt + MLflow + FastAPI + Prometheus
 
 ---
 
@@ -23,34 +23,43 @@
                         ┌──── JOUR 2 : MLOps ───────────────┐
                         │                                    │
   fraud_claims.csv ──→ train.py (3 modèles)                  │
-                            │                                │
-                      MLflow Tracking                        │
-                       (params, metrics, artifacts)          │
-                            │                                │
-                      Model Registry                         │
-                       (Dev → Staging → Prod)                │
-                            │                                │
-                      deploy.py (Canary 5→25→50→100%)        │
-                            │                                │
-                      GitHub Actions CI/CD                   │
+                             │                                │
+                       MLflow Tracking                        │
+                             │                                │
+                       Model Registry (Dev/Staging/Prod)      │
+                             │                                │
+                       GitHub Actions CI/CD                   │
+                        └────────────────────────────────────┘
+
+                        ┌──── JOUR 3 : PRODUCTION ──────────┐
+                        │                                    │
+  Model Registry ──→ quantize.py (FP32 -> INT8)               │
+                             │                                │
+                       FastAPI Production API                 │
+                             │                                │
+                       Prometheus & Grafana (Monitoring)      │
+                             │                                │
+                       Load Testing (1000+ req/s)             │
+                        └────────────────────────────────────┘
+
+                        ┌──── JOUR 4 : GOUVERNANCE & TRUST ─┐
+                        │                                    │
+  Privacy Guard ──→ PII Masking (RGPD)                       │
+                             │                                │
+  Ethics Monitor ──→ Bias Detection                          │
+                             │                                │
+  Rule Engine ──→ Business Constraints                       │
+                        └────────────────────────────────────┘
+
+                        ┌──── JOUR 5 : SYSTEME D'AGENTS ────┐
+                        │                                    │
+  User Input ──→ CrewAI Orchestrator                         │
+                             │                                │
+  Tools ──→ [ClickHouse, FastAPI J3, Prom, RGPD J4]          │
+                             │                                │
+  Output ──→ Justified & Secure Response                     │
                         └────────────────────────────────────┘
 ```
-
-### Stack Technique
-
-| Outil              | Rôle                              |
-| ------------------ | --------------------------------- |
-| Apache Airflow     | Orchestration du pipeline ETL     |
-| ClickHouse         | Data Warehouse analytique         |
-| MinIO              | Stockage S3 local                 |
-| dbt                | Transformation SQL                |
-| Great Expectations | Validation qualité des données    |
-| **MLflow**         | **Tracking & Model Registry**     |
-| **scikit-learn**   | **Entraînement ML (RF, SVM)**     |
-| **XGBoost**        | **Gradient Boosting**             |
-| **GitHub Actions** | **CI/CD pipeline**                |
-| Docker Compose     | Conteneurisation                  |
-| Slack              | Notifications                     |
 
 ---
 
@@ -60,254 +69,115 @@
 insurance-pipeline/
 ├── dags/
 │   └── airflow_pipeline.py            # DAG ETL (5 tasks)
-├── data/
-│   ├── sample_claims.csv              # Dataset ETL
-│   └── fraud_claims.csv               # Dataset ML (fraud detection)
-├── dbt/
-│   ├── models/
-│   │   ├── claims_transformed.sql
-│   │   ├── schema.yml
-│   │   └── sources.yml
-│   ├── dbt_project.yml
-│   └── profiles.yml
-├── great_expectations/
-│   └── great_expectations.yml
-├── mlops/                              # ◀ JOUR 2
-│   ├── __init__.py
-│   ├── generate_fraud_dataset.py      # Générateur dataset fraud
-│   ├── train.py                       # Pipeline d'entraînement (3 modèles)
-│   ├── deploy.py                      # Déploiement canary + API
-│   └── requirements.txt
-├── scripts/
-│   ├── generate_dataset.py
-│   ├── create_table.sql
-│   └── dashboard.py                   # Dashboard Streamlit
+├── api/                                # ◀ JOUR 3 : Production
+│   ├── main.py                        # FastAPI Production API
+│   ├── quantize.py                    # Script de Quantification
+│   ├── benchmark.py                   # Benchmark Performance
+│   ├── schemas.py                     # Pydantic Models
+│   └── Dockerfile
+├── mlops/                              # ◀ JOUR 2 : CI/CD & Training
+│   ├── train.py                       # Training Pipeline (3 modèles)
+│   ├── deploy.py                      # Canary Deployment Simulator
+│   └── generate_fraud_dataset.py      # Générateur dataset fraud
+├── governance/                         # ◀ JOUR 4 : Gouvernance
+│   ├── pii_masker.py                  # Anonymisation RGPD
+│   └── bias_monitor.py                # Détection de biais
+├── monitoring/
+│   └── prometheus.yml                 # Config Monitoring
+├── kubernetes/
+│   └── deployment.yaml                # Manifests K8s
 ├── tests/
-│   ├── test_pipeline.py               # Tests ETL (Jour 1)
-│   └── test_mlops.py                  # Tests MLOps (Jour 2)
-├── .github/
-│   └── workflows/
-│       └── ml-pipeline.yml            # CI/CD GitHub Actions
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
+│   ├── test_mlops.py                  # Tests unitaires & intégration
+│   └── load_test.jmx                  # JMeter Load Test
+├── docker-compose.yml                 # Stack Full (J1-J5)
+├── JOUR3_PRODUCTION_GUIDE.md          # Guide détaillé Jour 3
 └── README.md
+
+insurance-ai-agent/                     # ◀ JOUR 5 : AI Agent
+├── api/
+│   └── main.py                        # API de l'Agent (CrewAI)
+├── ui/
+│   └── app.py                         # Interface Streamlit
+└── core/
+    └── agents.py                      # Définition des agents & tools
 ```
 
 ---
 
-## 🚀 Installation & Lancement
+## 🚀 Installation & Lancement Quickstart
 
-### Prérequis
+### 1. Prérequis
+*   Docker & Docker Compose
+*   Python 3.11+
+*   Compte Slack (pour les alertes)
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- Python 3.11+
-- Git
-
-### 1. Cloner le projet
-
-```bash
-git clone <repo-url>
-cd insurance-pipeline
-```
-
-### 2. Lancer l'infrastructure Docker (Jour 1)
-
+### 2. Démarrage de l'Infrastructure (Jour 1)
 ```bash
 docker compose up -d
 ```
 
-### 3. Installer les dépendances MLOps (Jour 2)
-
+### 3. Pipeline MLOps (Jour 2)
 ```bash
 pip install -r mlops/requirements.txt
-```
-
-### 4. Vérifier les services
-
-| Service         | URL                    | Credentials            |
-| --------------- | ---------------------- | ---------------------- |
-| Airflow UI      | http://localhost:8080   | admin / admin          |
-| MinIO Console   | http://localhost:9001   | minioadmin / minioadmin|
-| ClickHouse HTTP | http://localhost:8123   | default / (vide)       |
-| Dashboard       | http://localhost:8501   | (Accès libre)          |
-| MLflow UI       | http://localhost:5000   | (après `mlflow ui`)    |
-
----
-
-# 📅 JOUR 1 — Data Engineering
-
-## 🔄 Pipeline DAG
-
-```
-extract_from_s3 → validate_schema → transform_data → load_to_clickhouse → send_notification
-```
-
-| Task               | Détail                                         |
-| ------------------ | ---------------------------------------------- |
-| Extract from S3    | Télécharge CSV depuis MinIO                    |
-| Validate Schema    | Great Expectations (nulls, ranges, statuts)    |
-| Transform Data     | dbt + Python (uppercase, filtre, catégories)   |
-| Load to ClickHouse | Insertion `insurance.claims_transformed`        |
-| Send Notification  | Slack avec métriques (rows, null%, duration)   |
-
-## 📊 Monitoring
-
-- **Freshness SLA** : Alerte Slack si pipeline > 1h (`sla_miss_callback`)
-- **Completeness** : `(rows_loaded / rows_extracted) * 100`
-- **Quality metrics** : `null_percentage`, `invalid_percentage`
-- **Dashboard** : Streamlit branché sur ClickHouse (port 8501)
-
----
-
-# 📅 JOUR 2 — MLOps
-
-## 🧠 Use Case : Détection de Fraude sur Sinistres
-
-Target : `fraud_reported` (0 = légitime, 1 = fraude)
-
-### 1. Training Pipeline (`mlops/train.py`)
-
-```bash
-# Générer le dataset fraud
 python -m mlops.generate_fraud_dataset
-
-# Lancer l'entraînement
 python -m mlops.train
 ```
 
-**3 modèles entraînés :**
-
-| Modèle        | Accuracy | F1-Score | ROC-AUC |
-| ------------- | -------- | -------- | ------- |
-| RandomForest  | 0.9380   | 0.8000   | 0.9789  |
-| XGBoost       | 0.9310   | 0.7877   | 0.9775  |
-| SVM           | 0.8770   | 0.6284   | 0.9077  |
-
-**Champion sélectionné automatiquement** sur le meilleur F1-Score.
-
-### 2. MLflow Tracking
-
-Chaque modèle enregistre dans MLflow :
-
-```python
-mlflow.set_experiment("insurance-fraud")
-mlflow.log_param("model_type", "RandomForest")
-mlflow.log_param("n_estimators", 200)
-mlflow.log_metric("accuracy", 0.938)
-mlflow.log_metric("f1_score", 0.80)
-mlflow.log_metric("roc_auc", 0.979)
-mlflow.log_artifact("confusion_matrix.png")
-mlflow.sklearn.log_model(model, "model")
+### 4. Mise en Production (Jour 3)
+```bash
+pip install -r api/requirements.txt
+python -m api.quantize
+docker compose -f docker-compose-api.yml up -d
 ```
 
-Lancer l'interface MLflow :
+---
+
+## 🔗 Accès aux Services
+
+| Service | URL | Identifiants |
+| :--- | :--- | :--- |
+| **Airflow UI** | [http://localhost:8080](http://localhost:8080) | `admin` / `admin` |
+| **MinIO Console** | [http://localhost:9001](http://localhost:9001) | `admin` / `password` |
+| **MLflow UI** | [http://localhost:5000](http://localhost:5000) | (Accès libre) |
+| **FastAPI J3** | [http://localhost:8000/docs](http://localhost:8000/docs) | (Swagger Prediction) |
+| **Agent API J5** | [http://localhost:8001/docs](http://localhost:8001/docs) | (Swagger Agent) |
+| **Streamlit Agent** | [http://localhost:8501](http://localhost:8501) | (UI Utilisateur) |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090) | (Metrics) |
+| **Grafana** | [http://localhost:3000](http://localhost:3000) | `admin` / `admin` |
+
+---
+
+## 📊 Performances & Monitoring
+
+### Quantification FP32 -> INT8
+La quantification réduit la taille du modèle et accélère l'inférence sans perte d'accuracy.
+*   **Compression** : ~2.0x plus léger (6MB -> 3MB)
+*   **Accélération** : ~1.3x plus rapide (Latence réduite)
+*   **Accuracy Delta** : < 0.1% (Négligeable)
+
+### Monitoring Prometheus
+Métriques exposées sur `/metrics` :
+*   `fraud_api_request_count` : Volume de requêtes par endpoint/modèle.
+*   `fraud_api_request_latency_seconds` : Distribution des latences.
+*   `fraud_api_prediction_distribution` : Suivi du taux de fraude détecté en temps réel.
+
+---
+
+## 🧪 Tests & Qualité
 
 ```bash
-mlflow ui --port 5000
-```
-
-### 3. Model Registry
-
-```
-                    ┌─────────────┐
-                    │ Development │
-                    └──────┬──────┘
-                           ↓
-                    ┌─────────────┐
-                    │   Staging   │
-                    └──────┬──────┘
-                           ↓
-                    ┌─────────────┐
-                    │ Production  │  ← Champion automatique
-                    └─────────────┘
-```
-
-- Le meilleur modèle est automatiquement enregistré sous `insurance-fraud-detector`
-- Transition automatique : Development → Staging → Production
-
-### 4. CI/CD GitHub Actions (`.github/workflows/ml-pipeline.yml`)
-
-```
-┌──────────┐     ┌──────────┐     ┌────────────────────┐
-│   Lint   │ ──→ │  Tests   │ ──→ │ Train & Register   │
-│ (flake8) │     │ (pytest) │     │ (3 models + gate)  │
-└──────────┘     └──────────┘     └────────────────────┘
-```
-
-Le pipeline CI/CD :
-1. **Lint** — Validation du code avec flake8
-2. **Tests unitaires** — pytest (data, preprocessing, modèles)
-3. **Training** — Entraîne les 3 modèles
-4. **Accuracy Gate** — Bloque si accuracy < 0.75
-5. **Register** — Enregistre le champion dans MLflow
-
-### 5. Canary Deployment (`mlops/deploy.py`)
-
-```bash
-python -m mlops.deploy
-```
-
-Déploiement progressif simulé :
-
-```
- 5% traffic ──→ vérification accuracy ──→ OK
-25% traffic ──→ vérification accuracy ──→ OK
-50% traffic ──→ vérification accuracy ──→ OK
-100% traffic ──→ DEPLOYED
-```
-
-**Rollback automatique** si accuracy < 0.70 à n'importe quel palier.
-
-### 6. Testing MLOps
-
-```bash
-# Tous les tests (19 tests)
+# Lancer les 19 tests MLOps (Data, Preproc, Model, Integr)
 pytest tests/test_mlops.py -v
 
-# Tests unitaires uniquement
-pytest tests/test_mlops.py -v -k "not TestIntegration"
+# Lancer le benchmark de performance comparatif
+python -m api.benchmark
 
-# Tests d'intégration
-pytest tests/test_mlops.py -v -k "TestIntegration"
-```
-
-| Suite                      | Tests | Description                         |
-| -------------------------- | ----- | ----------------------------------- |
-| TestDataGeneration         | 6     | Validité du dataset fraud           |
-| TestPreprocessing          | 4     | Scaling, features, balance          |
-| TestModelTraining          | 4     | RF, SVM, confusion matrix           |
-| TestIntegrationPipeline    | 2     | Pipeline E2E complet                |
-| TestModelAccuracyValidation| 3     | Accuracy > 0.75, F1, AUC gates      |
-
----
-
-## 🔐 Exécution Complète
-
-### Jour 1 — ETL
-1. `docker compose up -d`
-2. Ouvrir http://localhost:8080
-3. Activer le DAG `insurance_pipeline` → Trigger
-
-### Jour 2 — MLOps
-1. `pip install -r mlops/requirements.txt`
-2. `python -m mlops.generate_fraud_dataset`
-3. `python -m mlops.train`
-4. `mlflow ui --port 5000` → Ouvrir http://localhost:5000
-5. `python -m mlops.deploy`
-6. `pytest tests/test_mlops.py -v`
-
----
-
-## 🛑 Arrêt
-
-```bash
-docker compose down           # Arrêter les services
-docker compose down -v        # Arrêter + supprimer les volumes
+# Load Testing (JMeter)
+# Ouvrir tests/load_test.jmx dans JMeter
 ```
 
 ---
 
 ## 📝 Licence
-
 Projet académique — TP Industrialisation de l'IA dans le Cloud.
+Réalisé par l'équipe MLOps Assurance.

@@ -1,0 +1,38 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowReadInsuranceData",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::insurance-fraud-data",
+                "arn:aws:s3:::insurance-fraud-data/*"
+            ]
+        },
+        {
+            "Sid": "AllowMLflowReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "sagemaker:DescribeModel",
+                "sagemaker:ListModels"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyDeleteProdResources",
+            "Effect": "Deny",
+            "Action": [
+                "sagemaker:DeleteModel",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:sagemaker:*:*:model/*-prod-*",
+                "arn:aws:s3:::insurance-fraud-data/production/*"
+            ]
+        }
+    ]
+}
