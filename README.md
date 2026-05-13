@@ -89,17 +89,16 @@ insurance-pipeline/
 ├── tests/
 │   ├── test_mlops.py                  # Tests unitaires & intégration
 │   └── load_test.jmx                  # JMeter Load Test
+├── insurance-ai-agent/                 # ◀ JOUR 5 : AI Agent
+│   ├── api/
+│   │   └── main.py                     # API de l'Agent (CrewAI)
+│   ├── ui/
+│   │   └── app.py                      # Interface Streamlit
+│   └── core/
+│       └── agents.py                   # Définition des agents & tools
 ├── docker-compose.yml                 # Stack Full (J1-J5)
 ├── JOUR3_PRODUCTION_GUIDE.md          # Guide détaillé Jour 3
 └── README.md
-
-insurance-ai-agent/                     # ◀ JOUR 5 : AI Agent
-├── api/
-│   └── main.py                        # API de l'Agent (CrewAI)
-├── ui/
-│   └── app.py                         # Interface Streamlit
-└── core/
-    └── agents.py                      # Définition des agents & tools
 ```
 
 ---
@@ -128,6 +127,16 @@ python -m mlops.train
 pip install -r api/requirements.txt
 python -m api.quantize
 docker compose -f docker-compose-api.yml up -d
+```
+
+### 5. Système d'Agents (Jour 5)
+```bash
+# Lancement de la stack complète (recommandé)
+docker compose up -d
+
+# Ou lancement manuel de l'agent
+pip install -r insurance-ai-agent/requirements.txt
+uvicorn insurance-ai-agent.api.main:app --port 8001
 ```
 
 ---
